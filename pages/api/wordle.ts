@@ -20,45 +20,39 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-	console.log(req.method)
-	console.log(req.body)
-	if (true) {
-		let { guess }: { guess: string } = req.body; // Get guessed word
-		guess = guess.toLowerCase();
-		const wotd = getWordOfTheDay(); // Get word of the day :P
-		if (wotd === guess) {
-			res.status(200).json({ guess: guess, was_correct: true });
+	let { guess }: { guess: string } = req.body; // Get guessed word
+	guess = guess.toLowerCase();
+	const wotd = getWordOfTheDay(); // Get word of the day :P
+	if (wotd === guess) {
+		res.status(200).json({ guess: guess, was_correct: true });
+		return;
+	} else {
+		if (guess.length === 5) {
+			// We only support 5-char words right now.
+			// Incorrect guess
+			let arr: CharacterInfo[] = [];
+
+			for (let i = 0; i < guess.length; i++) {
+				arr.push({
+					char: guess[i],
+					scoring: {
+						in_word: isCharInWord(guess[i], wotd),
+						correct_idx: guess[i] === wotd[i],
+					},
+				});
+			}
+			const resp: IncorrectResponse = {
+				guess: guess,
+				was_correct: false,
+				character_info: arr,
+			};
+			res.status(200).json(resp);
 			return;
 		} else {
-			if (guess.length === 5) {
-				// We only support 5-char words right now.
-				// Incorrect guess
-				let arr: CharacterInfo[] = [];
-
-				for (let i = 0; i < guess.length; i++) {
-					arr.push({
-						char: guess[i],
-						scoring: {
-							in_word: isCharInWord(guess[i], wotd),
-							correct_idx: guess[i] === wotd[i],
-						},
-					});
-				}
-				const resp: IncorrectResponse = {
-					guess: guess,
-					was_correct: false,
-					character_info: arr,
-				};
-				res.status(200).json(resp);
-				return;
-			} else {
-				res
-					.status(400)
-					.json({ error: `Only 5 character words currently supported.` });
-				return;
-			}
+			res
+				.status(400)
+				.json({ error: `Only 5 character words currently supported.` });
+			return;
 		}
-	} else {
-		res.status(405).json({ error: `${req.method} unsupported.` });
 	}
 }
