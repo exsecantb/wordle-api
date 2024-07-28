@@ -22,7 +22,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 	console.log(req.method)
 	console.log(req.body)
-	if (req.method === "POST") {
+	if (true) {
 		let { guess }: { guess: string } = req.body; // Get guessed word
 		guess = guess.toLowerCase();
 		const wotd = getWordOfTheDay(); // Get word of the day :P
